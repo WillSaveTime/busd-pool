@@ -53,7 +53,7 @@ export default function Header(props) {
 
     return (
         <header className="Header align-items-center fixed-top mw-1000 m-auto">
-            <a href="https://safemutual.com/"><img src={require("../../assets/logo.png")} className="Logo" alt="logo" /></a>
+            <a href="https://safemutual.com/" className="logo-text"><img src="https://cryptologos.cc/logos/binance-usd-busd-logo.png?v=023" className="Logo" alt="logo" /> BUSD</a>
             <CSSTransition
                 in={!isSmallScreen || isNavVisible}
                 timeout={350}
