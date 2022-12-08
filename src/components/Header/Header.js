@@ -52,62 +52,64 @@ export default function Header(props) {
     };
 
     return (
-        <header className="Header align-items-center fixed-top mw-1000 m-auto">
-            <a href="https://safemutual.com/" className="logo-text"><img src="https://cryptologos.cc/logos/binance-usd-busd-logo.png?v=023" className="Logo" alt="logo" /> BUSD</a>
-            <CSSTransition
-                in={!isSmallScreen || isNavVisible}
-                timeout={350}
-                classNames="NavAnimation"
-                unmountOnExit
-            >
-                <nav className="Nav justify-content-end d-flex align-items-center">
-                    {menu.map((item, index) => (
-                        <Link
-                            key={index}
-                            to={item.href}
-                            spy={true}
-                            smooth={true}
-                            duration={50}
-                            activeClass='active'
-                            className={
-                                "px-3 py-2 rounded-md text-base font-medium "
-                            }
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                    {social_link.map((item, index) => (
-                        <a
-                            key={index}
-                            href={item.href}
-                            className={
-                                "px-2 py-2 rounded-md text-base font-medium "
-                            }
-                        >
-                            {item.icon}
-                        </a>
-                    ))}
-                    {!props.web3Provider ? (
-                        <button
-                            onClick={props.connect}
-                            className=""
-                        >
-                            CONNECT WALLET
-                        </button>
-                    ) : (
-                        <button
-                            onClick={props.disconnect}
-                            className=" "
-                        >
-                            {props.showAccountAddress}
-                        </button>
-                    )}
-                </nav>
-            </CSSTransition>
-            <button onClick={toggleNav} className="Burger">
-                {isNavVisible ? <AiOutlineClose color="#4a4e57" /> : <BsJustify color="#4a4e57" />}
-            </button>
-        </header>
+        <div className="container">
+            <header className="Header align-items-center pt-5 m-auto">
+                <a href="https://safemutual.com/" className="logo-text"><img src="https://cryptologos.cc/logos/binance-usd-busd-logo.png?v=023" className="Logo" alt="logo" /> BUSD</a>
+                <CSSTransition
+                    in={!isSmallScreen || isNavVisible}
+                    timeout={350}
+                    classNames="NavAnimation"
+                    unmountOnExit
+                >
+                    <nav className="Nav justify-content-end d-flex align-items-center">
+                        {menu.map((item, index) => (
+                            <Link
+                                key={index}
+                                to={item.href}
+                                spy={true}
+                                smooth={true}
+                                duration={50}
+                                activeClass='active'
+                                className={
+                                    "px-3 py-2 rounded-md text-base font-medium "
+                                }
+                            >
+                                {item.name}
+                            </Link>
+                        ))}
+                        {social_link.map((item, index) => (
+                            <a
+                                key={index}
+                                href={item.href}
+                                className={
+                                    "px-2 py-2 rounded-md text-base font-medium "
+                                }
+                            >
+                                {item.icon}
+                            </a>
+                        ))}
+                        {!props.web3Provider ? (
+                            <button
+                                onClick={props.connect}
+                                className=""
+                            >
+                                CONNECT WALLET
+                            </button>
+                        ) : (
+                            <button
+                                onClick={props.disconnect}
+                                className=" "
+                            >
+                                {props.showAccountAddress}
+                            </button>
+                        )}
+                    </nav>
+                </CSSTransition>
+                <button onClick={toggleNav} className="Burger">
+                    {isNavVisible ? <AiOutlineClose color="#4a4e57" /> : <BsJustify color="#4a4e57" />}
+                </button>
+            </header>
+        </div>
     );
 }
 

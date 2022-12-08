@@ -187,5 +187,12 @@ button {
   border-radius: 10px;
   border: 2px solid #050510 !important;
   padding: 4px 10px;
-  max-width: 120px;
+  max-width: 420px;
+}
+
+.content {
+  font-size: 28px;
+}
+.amount {
+  font-size: 1.5rem !important;
 }
