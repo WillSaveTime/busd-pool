@@ -17,10 +17,10 @@ export default function HomeScreen(props) {
             <div className="d-flex m-auto mb-2 style-1 mt-4 justify-content-between fs-2 gap-2">
                 <div>
                     <p>Deposited Amount:</p>
-                    <p className="amount">{props.web3Provider ? (props.userMinerAmount ? (props.userMinerAmount + " Million Miners") : "300 BUSD") : "- Miners"}</p></div>
+                    <p className="amount">{props.web3Provider ? (props.userMinerAmount ? (props.userMinerAmount + " Million Miners") : "300 BUSD") : "--"}</p></div>
                 <div>
                     <p>Daily Profit:</p>
-                    <p className="amount">{props.web3Provider ? (props.userBnbAmount ? props.userBnbAmount : "10 BUSD") : "-"}</p></div>
+                    <p className="amount">{props.web3Provider ? (props.userBnbAmount ? props.userBnbAmount : "10 BUSD") : "--"}</p></div>
                 <div>
                     <p>Total Value of Pool:</p>
                     <p className="amount">{props.contractBnbAmount ? (props.contractBnbAmount - 0).toFixed(3) : "1000000 BUSD"}</p></div>

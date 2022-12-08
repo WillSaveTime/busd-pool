@@ -54,7 +54,7 @@ export default function Header(props) {
     return (
         <div className="container">
             <header className="Header align-items-center pt-5 m-auto">
-                <a href="https://safemutual.com/" className="logo-text"><img src="https://cryptologos.cc/logos/binance-usd-busd-logo.png?v=023" className="Logo" alt="logo" /> BUSD</a>
+                <a href="#" className="logo-text"><img src="https://cryptologos.cc/logos/binance-usd-busd-logo.png?v=023" className="Logo" alt="logo" /> BUSD</a>
                 <CSSTransition
                     in={!isSmallScreen || isNavVisible}
                     timeout={350}
