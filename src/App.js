@@ -6,12 +6,12 @@ import Web3 from "web3";
 import dotenv from "dotenv";
 import { BrowserRouter } from 'react-router-dom';
 import config from "./contracts/config";
-import ABI from "./contracts/abi/Tminer.json";
 import POOL_ABI from './config/Pool_ABI.json';
 import BUSD_ABI from './config/Busd_ABI.json';
 import Header from './components/Header/Header'
 import HomeScreen from './pages/HomeScreen/HomeScreen'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { AiFillCodeSandboxCircle } from "react-icons/ai";
 const contactAddress = config.SafeMutual[config.chainID];
 dotenv.config();
 
@@ -79,11 +79,11 @@ function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { provider, web3Provider } = state;
 
-  const [userBnbAmount, setUserBnbAmount] = useState(0);
-  const [contractBnbAmount, setContractBnbAmount] = useState(0);
+  const [userBusdAmount, setUserBusdAmount] = useState(0);
+  const [contractBusdAmount, setContractBusdAmount] = useState(0);
   const [userMinerAmount, setUserMinerAmount] = useState(0);
-  const [userGetMyBnb, setUserGetMyBnb] = useState(0);
-
+  const [userGetMyBusd, setUserGetMyBusd] = useState(0);
+  const [userInfo, setUserInfo] = useState({})
 
   const connect = useCallback(async function () {
     try {
@@ -149,6 +149,7 @@ function App() {
       console.log(`${error}`);
     }
   }, []);
+
   const disconnect = useCallback(async function () {
     await web3Modal.clearCachedProvider();
     // setSigner(null);
@@ -158,11 +159,13 @@ function App() {
       type: "RESET_WEB3_PROVIDER",
     });
   }, []);
+
   useEffect(() => {
     if (web3Modal.cachedProvider) {
       connect();
     }
   }, [connect]);
+
   useEffect(() => {
     if (provider) {
       const handleAccountsChanged = (accounts) => {
@@ -191,31 +194,21 @@ function App() {
     }
   }, [provider]);
 
-
   useEffect(() => {
     const init = async () => {
       try {
         const readWeb3 = new Web3(config.RpcURL[config.chainID])
-        const poolContract = new readWeb3.eth.Contract(POOL_ABI, process.env.REACT_APP_POOL_CONTRACT);
-
-        const contractBnbAmount_ = await poolContract.methods.getBalance().call();
-        setContractBnbAmount(ethers.utils.formatUnits(contractBnbAmount_, "ether"));
+        const poolContract = new readWeb3.eth.Contract(POOL_ABI, config.POOL_CONTRACT);
+        const contractBusdAmount_ = await poolContract.methods.getBalance().call();
+        setContractBusdAmount(ethers.utils.formatUnits(contractBusdAmount_, "ether"));
 
         if (web3Provider && readWeb3.utils.isAddress(account)) {
           let balance = await web3Provider.getBalance(account);
+          const user_info = await poolContract.methods.getUserInfo(account).call();
+          setUserInfo(user_info)
+          console.log('user', user_info)
           balance = ethers.utils.formatUnits(balance, "ether");
-          setUserBnbAmount((balance - 0).toFixed(3));
-          const userMinerAmount_ = await poolContract.methods.accountMiners(account).call();
-          setUserMinerAmount(userMinerAmount_ / 10000);
-
-          const userGetMyBnb__ = await poolContract.methods.getMyBNB(account).call();
-          const userGetMyBnb_ = await poolContract.methods.calculateBNBell(userGetMyBnb__).call();
-          setUserGetMyBnb(ethers.utils.formatUnits(userGetMyBnb_, "ether"));
-
-          const lastHatch_ = await poolContract.methods.lastClaim(account).call();
-          const now_time = new Date().getTime();
-          setLastHatch((now_time - lastHatch_ * 1000) / 1000);
-          if (userMinerAmount_ == 0) setLastHatch(0);
+          setUserBusdAmount((balance - 0).toFixed(3));
         }
       } catch (error) {
         console.log(`${error}`);
@@ -246,18 +239,27 @@ function App() {
   }
 
   const handleDeposit = async (amount) => {
-
+    if(amount === 0) {
+      alert("Please input correct amount")
+      return
+    }
     try {
       const writeWeb3 = new Web3(provider);
-      const busdContract = new writeWeb3.eth.Contract(BUSD_ABI, process.env.REACT_APP_BUSD_CONTRACT)
-      const poolContract = new writeWeb3.eth.Contract(POOL_ABI, process.env.REACT_APP_POOL_CONTRACT);
+      const busdContract = new writeWeb3.eth.Contract(BUSD_ABI, config.BUSD_CONTRACT)
+      const poolContract = new writeWeb3.eth.Contract(POOL_ABI, config.POOL_CONTRACT);
       try {
-        let approveRes = await busdContract.methods.approve(process.env.REACT_APP_POOL_CONTRACT, amount)
-        await poolContract.methods.deposit(writeWeb3.utils.toWei(Number(amount).toString(), "ether")).send()
-        setRefresh(!refresh);
+        let approveRes = await busdContract.methods.approve(config.POOL_CONTRACT, "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff").send({ from: account })
+        if (approveRes) {
+          await poolContract.methods.deposit(writeWeb3.utils.toWei(Number(amount).toString(), "ether")).send({ from: account })
+          const user_info = await poolContract.methods.getUserInfo(account).call();
+          const contractBusdAmount_ = await poolContract.methods.getBalance().call();
+          setContractBusdAmount(ethers.utils.formatUnits(contractBusdAmount_, "ether"));
+          setUserInfo(user_info)
+          setRefresh(!refresh);
+        }
       }
       catch (error) {
-        console.log('approve error', error)
+        console.log('approve error-->', error)
       }
     }
     catch (error) {
@@ -267,14 +269,27 @@ function App() {
   const handleClaim = async () => {
     try {
       const writeWeb3 = new Web3(provider);
-      const poolContract = new writeWeb3.eth.Contract(ABI, process.env.REACT_APP_POOL_CONTRACT);
+      const poolContract = new writeWeb3.eth.Contract(POOL_ABI, config.POOL_CONTRACT);
       await poolContract.methods.claim().send({
         from: account,
       })
       setRefresh(!refresh);
     }
     catch (error) {
-      console.log(error.message);
+      console.log('claim error ---> ', error.message);
+    }
+  }
+
+  const handleWithdraw = async() => {
+    try {
+      const writeWeb3 = new Web3(provider);
+      const poolContract = new writeWeb3.eth.Contract(POOL_ABI, config.POOL_CONTRACT);
+      await poolContract.methods.withdraw().send({
+        from: account,
+      })
+      setRefresh(!refresh);
+    } catch (error) {
+      console.log('withdraw error -->', error)
     }
   }
 
@@ -288,14 +303,17 @@ function App() {
           <div className='container'>
             <HomeScreen
               web3Provider={web3Provider}
-              userGetMyBnb={userGetMyBnb}
+              userGetMyBusd={userGetMyBusd}
               account={account}
-              contractBnbAmount={contractBnbAmount}
+              contractBusdAmount={contractBusdAmount}
               userMinerAmount={userMinerAmount}
-              userBnbAmount={userBnbAmount}
+              userBusdAmount={userBusdAmount}
               handleDeposit={(depositAmount) => handleDeposit(depositAmount)}
+              handleWithdraw={handleWithdraw}
               handleClaim={handleClaim}
-              lastHatch={lastHatch}>
+              lastHatch={lastHatch}
+              userInfo={userInfo}
+            >
             </HomeScreen>
           </div>
         </div>

@@ -28,19 +28,12 @@ contract BUSD_POOL {
 
     address[] public allUsers;
 
-    bool public isLaunched = false;
-
     constructor(IERC20 _BUSD, address _admin) {
         BUSD = _BUSD;
         ADMIN = _admin;
     }
 
-    modifier whenLaunched() {
-        require(isLaunched, "NOT_START_YET");
-        _;
-    }
-
-    function deposit(uint256 amount) external whenLaunched {
+    function deposit(uint256 amount) external  {
         require(amount > 0, "ZERO BUSD AMOUNT");
         require(
             BUSD.transferFrom(msg.sender, address(this), amount),
@@ -54,7 +47,7 @@ contract BUSD_POOL {
         user_info[msg.sender].claimDate = block.timestamp;
     }
 
-    function withdrawMoney() external whenLaunched {
+    function withdrawMoney() external {
         uint256 passTime = block.timestamp - user_info[msg.sender].claimDate;
         uint256 profit = (((passTime / 1 days) * 3) / 1000) *
             user_info[msg.sender].amount;
@@ -67,7 +60,7 @@ contract BUSD_POOL {
         user_info[msg.sender].claimDate = block.timestamp;
     }
 
-    function claim() external whenLaunched {
+    function claim() external {
         uint256 passTime = block.timestamp - user_info[msg.sender].claimDate;
         uint256 profit = (((passTime / 1 days) * 3) / 1000) *
             user_info[msg.sender].amount;
@@ -82,7 +75,7 @@ contract BUSD_POOL {
         return profit;
     }
 
-    function getTotal() external view returns (uint256) {
+    function getBalance() external view returns (uint256) {
         return BUSD.balanceOf(address(this));
     }
 
