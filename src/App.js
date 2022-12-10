@@ -250,7 +250,6 @@ function App() {
     try {
       const writeWeb3 = new Web3(provider);
       const busdContract = new writeWeb3.eth.Contract(BUSD_ABI, process.env.REACT_APP_BUSD_CONTRACT)
-      console.log('busd', process.env.REACT_APP_BUSD_CONTRACT)
       const poolContract = new writeWeb3.eth.Contract(POOL_ABI, process.env.REACT_APP_POOL_CONTRACT);
       try {
         let approveRes = await busdContract.methods.approve(process.env.REACT_APP_POOL_CONTRACT, amount)
