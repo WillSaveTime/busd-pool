@@ -34,7 +34,7 @@ export default function HomeScreen(props) {
                         <div className="d-flex justify-content-between align-items-center gap-5">
                             <div className="position-relative">
                                 <span className="position-absolute fw-bold " style={{ top: "5px", right: "30px" }}>BUSD</span>
-                                <input placeholder="0 BNB" type="number" className="bnb-amount" min={0} value={depositAmount} onChange={(e) => { setDepositAmount(e.target.value) }} />
+                                <input placeholder="0 BUSD" type="number" className="bnb-amount" min={0} value={depositAmount} onChange={(e) => { setDepositAmount(e.target.value) }} />
                             </div>
                             <button className="button-4" onClick={() => props.handleDeposit(depositAmount)}>Make Deposit</button>
                             <button className="button-4" onClick={props.handleCompound}> Withdraw</button>

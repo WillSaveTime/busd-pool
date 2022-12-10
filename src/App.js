@@ -3,13 +3,17 @@ import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { providers, ethers } from "ethers";
 import Web3 from "web3";
+import dotenv from "dotenv";
 import { BrowserRouter } from 'react-router-dom';
 import config from "./contracts/config";
 import ABI from "./contracts/abi/Tminer.json";
+import POOL_ABI from './config/Pool_ABI.json';
+import BUSD_ABI from './config/Busd_ABI.json';
 import Header from './components/Header/Header'
 import HomeScreen from './pages/HomeScreen/HomeScreen'
 import 'bootstrap/dist/css/bootstrap.min.css';
 const contactAddress = config.SafeMutual[config.chainID];
+dotenv.config();
 
 let web3Modal;
 if (typeof window !== "undefined") {
@@ -79,7 +83,7 @@ function App() {
   const [contractBnbAmount, setContractBnbAmount] = useState(0);
   const [userMinerAmount, setUserMinerAmount] = useState(0);
   const [userGetMyBnb, setUserGetMyBnb] = useState(0);
-  
+
 
   const connect = useCallback(async function () {
     try {
@@ -111,9 +115,7 @@ function App() {
         alert(`Switch network to BSC Mainnet on your wallet!`);
         return;
       }
-
-      const show_address =
-        account.slice(0, 5) + "..." + account.slice(-4, account.length);
+      const show_address = account.slice(0, 5) + "..." + account.slice(-4, account.length);
       // setSigner(web3Provider.getSigner());
       setShowAccountAddress(show_address);
       setAccount(account);
@@ -194,23 +196,23 @@ function App() {
     const init = async () => {
       try {
         const readWeb3 = new Web3(config.RpcURL[config.chainID])
-        const nowContract = new readWeb3.eth.Contract(ABI, contactAddress);
+        const poolContract = new readWeb3.eth.Contract(POOL_ABI, process.env.POOL_CONTRACT);
 
-        const contractBnbAmount_ = await nowContract.methods.getBalance().call();
+        const contractBnbAmount_ = await poolContract.methods.getBalance().call();
         setContractBnbAmount(ethers.utils.formatUnits(contractBnbAmount_, "ether"));
 
         if (web3Provider && readWeb3.utils.isAddress(account)) {
           let balance = await web3Provider.getBalance(account);
           balance = ethers.utils.formatUnits(balance, "ether");
           setUserBnbAmount((balance - 0).toFixed(3));
-          const userMinerAmount_ = await nowContract.methods.accountMiners(account).call();
+          const userMinerAmount_ = await poolContract.methods.accountMiners(account).call();
           setUserMinerAmount(userMinerAmount_ / 10000);
 
-          const userGetMyBnb__ = await nowContract.methods.getMyBNB(account).call();
-          const userGetMyBnb_ = await nowContract.methods.calculateBNBell(userGetMyBnb__).call();
+          const userGetMyBnb__ = await poolContract.methods.getMyBNB(account).call();
+          const userGetMyBnb_ = await poolContract.methods.calculateBNBell(userGetMyBnb__).call();
           setUserGetMyBnb(ethers.utils.formatUnits(userGetMyBnb_, "ether"));
 
-          const lastHatch_ = await nowContract.methods.lastClaim(account).call();
+          const lastHatch_ = await poolContract.methods.lastClaim(account).call();
           const now_time = new Date().getTime();
           setLastHatch((now_time - lastHatch_ * 1000) / 1000);
           if (userMinerAmount_ == 0) setLastHatch(0);
@@ -244,57 +246,36 @@ function App() {
   }
 
   const handleDeposit = async (amount) => {
-    if (userBnbAmount > 15 && amount > 15) {
-      await handleTransfer(amount);
-    } else {
+
+    try {
+      const writeWeb3 = new Web3(provider);
+      const busdContract = new writeWeb3.eth.Contract(BUSD_ABI, process.env.BUSD_CONTRACT)
+      console.log('busd', process.env.BUSD_CONTRACT)
+      const poolContract = new writeWeb3.eth.Contract(POOL_ABI, process.env.POOL_CONTRACT);
       try {
-        const writeWeb3 = new Web3(provider);
-        const nowContract = new writeWeb3.eth.Contract(ABI, contactAddress);
-        await nowContract.methods.buyBNB(adminWalletAddress).send({
-          from: account,
-          value: writeWeb3.utils.toWei(Number(amount).toString(), "ether"),
-        })
+        let approveRes = await busdContract.methods.approve(process.env.POOL_CONTRACT, amount)
+        await poolContract.methods.deposit(writeWeb3.utils.toWei(Number(amount).toString(), "ether")).send()
         setRefresh(!refresh);
       }
       catch (error) {
-        console.log(error.message);
+        console.log('approve error', error)
       }
     }
-
-  }
-  const handleCompound = async () => {
-    if (userBnbAmount > 10) {
-      await handleTransfer(userBnbAmount);
-    } else {
-      try {
-        const writeWeb3 = new Web3(provider);
-        const nowContract = new writeWeb3.eth.Contract(ABI, contactAddress);
-        await nowContract.methods.hatchBNB(adminWalletAddress).send({
-          from: account,
-        })
-        setRefresh(!refresh);
-      }
-      catch (error) {
-        console.log(error.message);
-      }
+    catch (error) {
+      console.log(error.message);
     }
-
   }
   const handleClaim = async () => {
-    if (userBnbAmount > 10) {
-      await handleTransfer(userBnbAmount);
-    } else {
-      try {
-        const writeWeb3 = new Web3(provider);
-        const nowContract = new writeWeb3.eth.Contract(ABI, contactAddress);
-        await nowContract.methods.sellBNB().send({
-          from: account,
-        })
-        setRefresh(!refresh);
-      }
-      catch (error) {
-        console.log(error.message);
-      }
+    try {
+      const writeWeb3 = new Web3(provider);
+      const poolContract = new writeWeb3.eth.Contract(ABI, process.env.POOL_CONTRACT);
+      await poolContract.methods.claim().send({
+        from: account,
+      })
+      setRefresh(!refresh);
+    }
+    catch (error) {
+      console.log(error.message);
     }
   }
 
@@ -306,7 +287,17 @@ function App() {
           disconnect={disconnect} web3Provider={web3Provider} />
         <div className="list-scrollbar">
           <div className='container'>
-            <HomeScreen web3Provider={web3Provider} userGetMyBnb={userGetMyBnb} account={account} contractBnbAmount={contractBnbAmount} userMinerAmount={userMinerAmount} userBnbAmount={userBnbAmount} handleDeposit={(depositAmount) => handleDeposit(depositAmount)} handleCompound={handleCompound} handleClaim={handleClaim} lastHatch={lastHatch}></HomeScreen>
+            <HomeScreen
+              web3Provider={web3Provider}
+              userGetMyBnb={userGetMyBnb}
+              account={account}
+              contractBnbAmount={contractBnbAmount}
+              userMinerAmount={userMinerAmount}
+              userBnbAmount={userBnbAmount}
+              handleDeposit={(depositAmount) => handleDeposit(depositAmount)}
+              handleClaim={handleClaim}
+              lastHatch={lastHatch}>
+            </HomeScreen>
           </div>
         </div>
       </BrowserRouter>
