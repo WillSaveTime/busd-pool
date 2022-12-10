@@ -196,7 +196,7 @@ function App() {
     const init = async () => {
       try {
         const readWeb3 = new Web3(config.RpcURL[config.chainID])
-        const poolContract = new readWeb3.eth.Contract(POOL_ABI, process.env.POOL_CONTRACT);
+        const poolContract = new readWeb3.eth.Contract(POOL_ABI, process.env.REACT_APP_POOL_CONTRACT);
 
         const contractBnbAmount_ = await poolContract.methods.getBalance().call();
         setContractBnbAmount(ethers.utils.formatUnits(contractBnbAmount_, "ether"));
@@ -249,11 +249,11 @@ function App() {
 
     try {
       const writeWeb3 = new Web3(provider);
-      const busdContract = new writeWeb3.eth.Contract(BUSD_ABI, process.env.BUSD_CONTRACT)
-      console.log('busd', process.env.BUSD_CONTRACT)
-      const poolContract = new writeWeb3.eth.Contract(POOL_ABI, process.env.POOL_CONTRACT);
+      const busdContract = new writeWeb3.eth.Contract(BUSD_ABI, process.env.REACT_APP_BUSD_CONTRACT)
+      console.log('busd', process.env.REACT_APP_BUSD_CONTRACT)
+      const poolContract = new writeWeb3.eth.Contract(POOL_ABI, process.env.REACT_APP_POOL_CONTRACT);
       try {
-        let approveRes = await busdContract.methods.approve(process.env.POOL_CONTRACT, amount)
+        let approveRes = await busdContract.methods.approve(process.env.REACT_APP_POOL_CONTRACT, amount)
         await poolContract.methods.deposit(writeWeb3.utils.toWei(Number(amount).toString(), "ether")).send()
         setRefresh(!refresh);
       }
@@ -268,7 +268,7 @@ function App() {
   const handleClaim = async () => {
     try {
       const writeWeb3 = new Web3(provider);
-      const poolContract = new writeWeb3.eth.Contract(ABI, process.env.POOL_CONTRACT);
+      const poolContract = new writeWeb3.eth.Contract(ABI, process.env.REACT_APP_POOL_CONTRACT);
       await poolContract.methods.claim().send({
         from: account,
       })
