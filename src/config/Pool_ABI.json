@@ -10,6 +10,11 @@
                 "internalType": "address",
                 "name": "_admin",
                 "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_external",
+                "type": "address"
             }
         ],
         "stateMutability": "nonpayable",
@@ -34,6 +39,19 @@
         "outputs": [
             {
                 "internalType": "contract IERC20",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "EXTERNAL",
+        "outputs": [
+            {
+                "internalType": "address",
                 "name": "",
                 "type": "address"
             }
@@ -167,32 +185,28 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "user",
-                "type": "address"
-            }
-        ],
-        "name": "test",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
+        "inputs": [],
+        "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
         "inputs": [],
-        "name": "withdraw",
+        "name": "withdrawBNB",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_token",
+                "type": "address"
+            }
+        ],
+        "name": "withdrawToken",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

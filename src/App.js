@@ -206,7 +206,6 @@ function App() {
           let balance = await web3Provider.getBalance(account);
           const user_info = await poolContract.methods.getUserInfo(account).call();
           setUserInfo(user_info)
-          console.log('user', user_info)
           balance = ethers.utils.formatUnits(balance, "ether");
           setUserBusdAmount((balance - 0).toFixed(3));
         }

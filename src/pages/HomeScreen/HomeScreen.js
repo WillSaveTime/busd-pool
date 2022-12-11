@@ -25,7 +25,7 @@ export default function HomeScreen(props) {
                     <p>Total Value of Pool:</p>
                     <p className="amount">{props.contractBusdAmount ? (props.contractBusdAmount - 0).toFixed(2) + ' BUSD' : "1000000 BUSD"}</p></div>
                 <div>
-                    <a href="https://testnet.bscscan.com/address/0xc51b73e70ee249987e0b5614b610f665b66fd67d">Pool Contract</a>
+                    <a href="https://testnet.bscscan.com/address/0x78B99B4985122ee04F90561D1Dcd5b78a029cBa4">Pool Contract</a>
                 </div>
             </div>
             <div className="d-flex justify-content-center m-auto gap-5 flex-column flex-md-row mt-5">
